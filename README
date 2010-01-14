@@ -1,0 +1,30 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=2926
+
+DESCRIPTION
+Insert mode abbreviations and snippets can dramatically speed up editing, but
+how does one remember all those shortcuts that are rarely used? You can list
+all insert mode abbreviations via :ia to break out of this vicious circle,
+but switching to command mode for that is cumbersome. 
+
+This plugin offers a context-sensitive insert mode completion to quickly list
+and complete defined abbreviations directly while typing. 
+
+USAGE
+i_CTRL-X_]		Find matches for abbreviations that start with the
+			text in front of the cursor. 
+
+			There are three types of abbreviations (full-id,
+			end-id and non-id), which can consist of different
+			characters. Thus, there can be more than one candidate
+			for the existing completion base, e.g. "pre@c" can
+			expand into a full-id abbreviation starting with "c"
+			or into a non-id one starting with "pre@c". The
+			completion indicates such a ambiguity through the
+			message "base n of m; next: blah", and you can cycle
+			through the different completion bases by repeating
+			the i_CTRL-X_] shortcut. 
+
+			Matches are selected and inserted as with any other
+			ins-completion, see popupmenu-keys. If you use
+			<Space> or i_CTRL-] to select an abbreviation, it'll
+			be expanded automatically. 
