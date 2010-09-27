@@ -48,13 +48,13 @@ i_CTRL-X_]		Find matches for abbreviations that start with the
 ==============================================================================
 INSTALLATION					*SnippetComplete-installation*
 
-This script is packaged as a|vimball|. If you have the "gunzip" decompressor
+This script is packaged as a |vimball|. If you have the "gunzip" decompressor
 in your PATH, simply edit the *.vba.gz package in Vim; otherwise, decompress
 the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
-vimball or via the|:UseVimball|command. >
+vimball or via the |:UseVimball| command. >
     vim SnippetComplete.vba.gz
     :so %
-To uninstall, use the|:RmVimball|command. 
+To uninstall, use the |:RmVimball| command. 
 
 DEPENDENCIES					*SnippetComplete-dependencies*
 
@@ -90,6 +90,9 @@ IDEAS						       *SnippetComplete-ideas*
 ==============================================================================
 HISTORY						     *SnippetComplete-history*
 
+1.01	25-Sep-2010
+Using separate autoload script to help speed up Vim startup. 
+
 1.00	12-Jan-2010
 First published version. 
 
@@ -97,7 +100,7 @@ First published version.
 Started development. 
 
 ==============================================================================
-Copyright: (C) 2010 by Ingo Karkat
+Copyright: (C) 2010 Ingo Karkat
 The VIM LICENSE applies to this script; see|copyright|. 
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
