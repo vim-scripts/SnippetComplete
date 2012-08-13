@@ -12,6 +12,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   2.01.007	13-Aug-2012	FIX: Vim 7.0/1 need preloading of functions
+"				referenced in Funcrefs.
 "   2.00.006	05-May-2012	Rename g:SnippetComplete_Registry to
 "				g:SnippetComplete_RegisteredTypes and pass this
 "				to SnippetComplete#SnippetComplete() to allow
@@ -41,6 +43,8 @@ set cpo&vim
 "- integration -----------------------------------------------------------------
 
 if ! exists('g:SnippetComplete_AbbreviationTypes')
+    if v:version < 702 | runtime autoload/SnippetComplete/Abbreviations.vim | endif  " The Funcref doesn't trigger the autoload in older Vim versions.
+
     let g:SnippetComplete_AbbreviationTypes = {
     \   'fullid': {
     \       'priority': 10,

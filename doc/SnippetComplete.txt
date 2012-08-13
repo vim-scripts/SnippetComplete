@@ -124,6 +124,9 @@ IDEAS						       *SnippetComplete-ideas*
 ==============================================================================
 HISTORY						     *SnippetComplete-history*
 
+2.01	13-Aug-2012
+- FIX: Vim 7.0/1 need preloading of functions referenced in Funcrefs.
+
 2.00	08-May-2012
 - Modularize and generalize for completing other types of snippets (e.g. from
   snipMate).
@@ -139,7 +142,7 @@ Started development.
 
 ==============================================================================
 Copyright: (C) 2010-2012 Ingo Karkat
-The VIM LICENSE applies to this script; see|copyright|.
+The VIM LICENSE applies to this script; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
 ==============================================================================
