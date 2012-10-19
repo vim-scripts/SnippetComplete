@@ -25,10 +25,19 @@ and complete defined abbreviations directly while typing.
 
 ==============================================================================
 USAGE						       *SnippetComplete-usage*
+
+In insert mode, optionally type part of the snippet shortcut or a fragment
+from its expected expansion, and invoke the snippet completion via CTRL-X ].
+You can then search forward and backward via CTRL-N / CTRL-P, as usual.
 								  *i_CTRL-X_]*
-i_CTRL-X_]		Find matches for abbreviations that start with the
+CTRL-X ]		Find matches for abbreviations that start with the
 			text in front of the cursor. If other snippet types
 			are registered, show those, too.
+			If no matches were found that way, matches anywhere in
+			the snippet or in the snippet's expanded text will be
+			shown. So if you can't remember the shortcut, but a
+			word fragment from the resulting expansion, just try
+			with that.
 
 			There are three types of |abbreviations| (full-id,
 			end-id and non-id), which can consist of different
@@ -50,22 +59,27 @@ i_CTRL-X_]		Find matches for abbreviations that start with the
 INSTALLATION					*SnippetComplete-installation*
 
 This script is packaged as a |vimball|. If you have the "gunzip" decompressor
-in your PATH, simply edit the *.vba.gz package in Vim; otherwise, decompress
+in your PATH, simply edit the *.vmb.gz package in Vim; otherwise, decompress
 the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
 vimball or via the |:UseVimball| command. >
-    vim SnippetComplete.vba.gz
+    vim SnippetComplete*.vmb.gz
     :so %
 To uninstall, use the |:RmVimball| command.
 
 DEPENDENCIES					*SnippetComplete-dependencies*
 
 - Requires Vim 7.0 or higher.
+- Requires the |CompleteHelper.vim| plugin (vimscript #3914), version 1.10 or
+  higher.
 
 ==============================================================================
 CONFIGURATION				       *SnippetComplete-configuration*
 
+For a permanent configuration, put the following commands into your |vimrc|:
+
+						       *SnippetComplete-remap*
 If you want to use a different mapping, map your keys to the
-<Plug>(SnippetComplete) mapping target _before_ sourcing this script (e.g. in
+<Plug>(SnippetComplete) mapping target _before_ sourcing the script (e.g. in
 your |vimrc|).
 For example, to use CTRL-X <Tab>, use this: >
     imap <C-x><Tab> <Plug>(SnippetComplete)
@@ -117,12 +131,19 @@ KNOWN PROBLEMS				      *SnippetComplete-known-problems*
 TODO							*SnippetComplete-todo*
 
 - Getting and sorting of matches when 'ignorecase' is on.
-- Limiting the length of the snippet expansion shown in the popup menu.
 
 IDEAS						       *SnippetComplete-ideas*
 
 ==============================================================================
 HISTORY						     *SnippetComplete-history*
+
+2.10	19-Oct-2012
+- ENH: When no base doesn't match with the beginning of a snippet, fall back
+  to matches either anywhere in the snippet or in the snippet expansion.
+- Truncate very long or multi-line snippet expansions in the popup menu. This
+  requires the CompleteHelper plugin. When the entire snippet doesn't fit into
+  the popup menu, offer it for showing in the preview window.
+  *** THIS PLUGIN NOW REQUIRES THE CompleteHelper PLUGIN (vimscript #3914) ***
 
 2.01	13-Aug-2012
 - FIX: Vim 7.0/1 need preloading of functions referenced in Funcrefs.

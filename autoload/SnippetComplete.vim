@@ -2,6 +2,7 @@
 " abbreviations and snippets.
 "
 " DEPENDENCIES:
+"   - CompleteHelper/Abbreviate.vim autoload script
 "
 " Copyright: (C) 2010-2012 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -9,6 +10,18 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   2.10.005	18-Oct-2012	Must use the keyword before the cursor for
+"				matches in the snippet expansion, not the type's
+"				base column.
+"   2.10.004	17-Oct-2012	ENH: When no base doesn't match with the
+"				beginning of a snippet, fall back to matches
+"				either anywhere in the snippet or in the snippet
+"				expansion.
+"				Truncate very long or multi-line snippet
+"				expansions in the popup menu. This requires the
+"				CompleteHelper plugin. When the entire snippet
+"				doesn't fit into the popup menu, offer it for
+"				showing in the preview window.
 "   2.00.003	05-May-2012	Rewrite s:RegistryTypeCompare() so that it
 "				doesn't need to access
 "				g:SnippetComplete_Registry.
@@ -109,21 +122,28 @@ endfunction
 function! s:GetBase( baseCol, cursorCol )
     return strpart(getline('.'), a:baseCol - 1, (a:cursorCol - a:baseCol))
 endfunction
-function! s:MatchSnippets( snippets, baseCol )
-    let l:base = s:GetBase(a:baseCol, col('.'))
-"****D echomsg '****' a:baseCol l:base
-    return (empty(l:base) ?
-    \   a:snippets :
-    \   filter(copy(a:snippets), 'strpart(v:val.word, 0, ' . len(l:base) . ') ==# ' . string(l:base))
+function! s:MatchSnippetsStrict( snippets, base )
+    return filter(copy(a:snippets), 'strpart(v:val.word, 0, ' . len(a:base) . ') ==# ' . string(a:base))
+endfunction
+function! s:MatchSnippetsRelaxed( snippets, base )
+    return filter(copy(a:snippets), 'stridx(v:val.word, a:base) != -1')
+endfunction
+function! s:MatchSnippetsExpansion( snippets, base )
+    return filter(copy(a:snippets),
+    \   'stridx(get(v:val, "menu", ""), a:base) != -1 ||' .
+    \   'stridx(get(v:val, "info", ""), a:base) != -1'
     \)
 endfunction
-function! s:GetSnippetCompletions( types )
-    let l:baseColumns = s:DetermineBaseCol(a:types)
-"****D echomsg '####' string(l:baseColumns)
+function! s:GetSnippetCompletionsWithStrategy( Strategy, types, baseColumns )
     let l:completionsByBaseCol = {}
-    for [l:type, l:baseCol] in l:baseColumns
+    for [l:type, l:baseCol] in a:baseColumns
 	let l:snippets = s:GetSnippets(a:types, l:type)
-	let l:matches = s:MatchSnippets(l:snippets, l:baseCol)
+	let l:base = s:GetBase(l:baseCol, col('.'))
+"****D echomsg '****' l:baseCol l:base
+	let l:matches = (empty(l:base) ?
+	\   l:snippets :
+	\   call(a:Strategy, [l:snippets, l:base])
+	\)
 "****D echomsg '****' l:type string(l:matches)
 	if ! empty(l:matches)
 	    let l:completions = get(l:completionsByBaseCol, l:baseCol, [])
@@ -132,6 +152,35 @@ function! s:GetSnippetCompletions( types )
 	endif
     endfor
 "****D echomsg '****' string(l:completionsByBaseCol)
+    return l:completionsByBaseCol
+endfunction
+function! s:GetSnippetCompletions( types )
+    let l:baseColumns = s:DetermineBaseCol(a:types)
+"****D echomsg '####' string(l:baseColumns)
+    let l:completionsByBaseCol = s:GetSnippetCompletionsWithStrategy('s:MatchSnippetsStrict', a:types, l:baseColumns)
+    if empty(l:completionsByBaseCol)
+	" When the base doesn't match with the beginning of a snippet, fall back
+	" to matches either anywhere in the snippet or in the snippet expansion.
+
+	" First do a relaxed match anywhere in the snippet.
+	let l:completionsByBaseCol = s:GetSnippetCompletionsWithStrategy('s:MatchSnippetsRelaxed', a:types, l:baseColumns)
+
+	" Then add any matches in the snippet expansion.
+	" For these, the keyword before the cursor must be used as base, not the
+	" base columns as determined by the snippet type!
+	let l:startCol = searchpos('\k*\%#', 'bn', line('.'))[1]
+	if l:startCol != 0
+	    let l:startColumns = map(keys(a:types), '[v:val, l:startCol]') " Transform into the expected structure.
+	    let l:completionsByStartCol = s:GetSnippetCompletionsWithStrategy('s:MatchSnippetsExpansion', a:types, l:startColumns)
+
+	    " Add the matches to any matches already existing for that base
+	    " column. There will be duplicates when the base matches both in the
+	    " snippet and its expansion, but Vim's completion will ignore
+	    " identical entries.
+	    let l:completionsByBaseCol[l:startCol] = get(l:completionsByBaseCol, l:startCol, []) +
+	    \   get(l:completionsByStartCol, l:startCol, [])
+	endif
+    endif
     return l:completionsByBaseCol
 endfunction
 function! s:CompletionCompare( c1, c2 )
@@ -175,6 +224,23 @@ function! s:RecordPosition()
     " a window above the current), the position changes.
     return getpos('.') + [bufnr(''), winnr(), tabpagenr()]
 endfunction
+function! s:FormatMatches( matchObject )
+    " Shorten the snippet expansion if necessary.
+    let l:menu = get(a:matchObject, 'menu', '')
+    let l:text = CompleteHelper#Abbreviate#Text(l:menu)
+    if l:text !=# l:menu
+	let a:matchObject.menu = l:text
+
+	if ! has_key(a:matchObject, 'info')
+	    " When the entire snippet doesn't fit into the popup menu, offer it
+	    " for showing in the preview window.
+	    let a:matchObject.info = l:menu
+	endif
+    endif
+
+    return a:matchObject
+endfunction
+
 let s:lastCompletionsByBaseCol = {}
 let s:nextBaseIdx = 0
 let s:initialCompletePosition = []
@@ -206,7 +272,9 @@ function! SnippetComplete#SnippetComplete( types )
 
     if l:baseNum > 0
 	" Show the completions for the current base.
-	call complete(l:baseColumns[l:baseIdx], sort(s:lastCompletionsByBaseCol[l:baseColumns[l:baseIdx]], 's:CompletionCompare'))
+	let l:matches = sort(s:lastCompletionsByBaseCol[l:baseColumns[l:baseIdx]], 's:CompletionCompare')
+	call map(l:matches, 's:FormatMatches(v:val)')
+	call complete(l:baseColumns[l:baseIdx], l:matches)
 	let s:lastCompleteEndPosition = s:RecordPosition()
 
 	if l:baseNum > 1
