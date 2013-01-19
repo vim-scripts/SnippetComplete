@@ -3,13 +3,16 @@
 "
 " DEPENDENCIES:
 "   - CompleteHelper/Abbreviate.vim autoload script
+"   - ingocollections.vim autoload script
 "
-" Copyright: (C) 2010-2012 Ingo Karkat
+" Copyright: (C) 2010-2013 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   2.11.006	15-Jan-2013	FIX: Must use numerical sort()
+"				for s:lastCompletionsByBaseCol.
 "   2.10.005	18-Oct-2012	Must use the keyword before the cursor for
 "				matches in the snippet expansion, not the type's
 "				base column.
@@ -268,7 +271,7 @@ function! SnippetComplete#SnippetComplete( types )
     " and thus always generate the shortest bases; end-id and non-id
     " abbreviations accept more character classes and can result in longer
     " bases.
-    let l:baseColumns = reverse(sort(keys(s:lastCompletionsByBaseCol)))
+    let l:baseColumns = reverse(sort(keys(s:lastCompletionsByBaseCol), 'ingocollections#numsort'))
 
     if l:baseNum > 0
 	" Show the completions for the current base.

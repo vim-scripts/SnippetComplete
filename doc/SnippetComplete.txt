@@ -23,6 +23,11 @@ but switching to command mode for that is cumbersome.
 This plugin offers a context-sensitive insert mode completion to quickly list
 and complete defined abbreviations directly while typing.
 
+SEE ALSO								     *
+
+- The |SnippetCompleteSnipMate.vim| plugin (vimscript #4276) extends the
+  completion with snippets for the popular snipMate plugin (vimscript #2540).
+
 ==============================================================================
 USAGE						       *SnippetComplete-usage*
 
@@ -137,6 +142,9 @@ IDEAS						       *SnippetComplete-ideas*
 ==============================================================================
 HISTORY						     *SnippetComplete-history*
 
+2.11	15-Jan-2013
+FIX: Must use numerical sort() for s:lastCompletionsByBaseCol.
+
 2.10	19-Oct-2012
 - ENH: When no base doesn't match with the beginning of a snippet, fall back
   to matches either anywhere in the snippet or in the snippet expansion.
@@ -162,7 +170,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2010-2012 Ingo Karkat
+Copyright: (C) 2010-2013 Ingo Karkat
 The VIM LICENSE applies to this script; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>

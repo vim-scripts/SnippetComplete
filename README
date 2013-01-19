@@ -42,3 +42,7 @@ CTRL-X ]                Find matches for abbreviations that start with the
                         ins-completion, see popupmenu-keys. If you use
                         <Space> or i_CTRL-] to select an abbreviation, it'll
                         be expanded automatically.
+
+CTRL-X g]               Find matches for buffer-local abbreviations that start
+                        with the text in front of the cursor. If other snippet
+                        types are registered, show those (local ones), too.
