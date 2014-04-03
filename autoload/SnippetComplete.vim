@@ -3,7 +3,8 @@
 "
 " DEPENDENCIES:
 "   - CompleteHelper/Abbreviate.vim autoload script
-"   - ingocollections.vim autoload script
+"   - ingo/cmdline/showmode.vim autoload script
+"   - ingo/collections.vim autoload script
 "
 " Copyright: (C) 2010-2013 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -11,6 +12,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   2.12.008	18-Jun-2013	Factor out s:SetupCmdlineForBaseMessage() into
+"				the ingo-library as
+"				ingo#cmdline#showmode#OneLineTemporaryNoShowMode().
+"   2.12.007	21-Feb-2013	Move ingocollections to ingo-library.
 "   2.11.006	15-Jan-2013	FIX: Must use numerical sort()
 "				for s:lastCompletionsByBaseCol.
 "   2.10.005	18-Oct-2012	Must use the keyword before the cursor for
@@ -190,27 +195,15 @@ function! s:CompletionCompare( c1, c2 )
     return (a:c1.word ==# a:c2.word ? 0 : a:c1.word ># a:c2.word ? 1 : -1)
 endfunction
 
-function! s:SetupCmdlineForBaseMessage()
+function! s:ShowMultipleBasesMessage( nextIdx, baseNum, nextBase )
     " The message about multiple bases should appear in the same way as Vim's
     " built-in "match m of n" completion mode messages. Unfortunately, an active
     " 'showmode' setting may prevent the user from seeing the message in a
     " one-line command line. Thus, we temporarily disable the 'showmode'
-    " setting.
-    if &showmode && &cmdheight == 1
-	set noshowmode
-
-	" Use a single-use autocmd to restore the 'showmode' setting when the
-	" cursor is moved (this already happens when a next match is selected,
-	" but then the "match m of n" message takes over) or insert mode is
-	" left.
-	augroup SnippetCompleteTemporaryNoShowMode
-	    autocmd!
-	    autocmd CursorMovedI,InsertLeave * set showmode | autocmd! SnippetCompleteTemporaryNoShowMode
-	augroup END
-    endif
-endfunction
-function! s:ShowMultipleBasesMessage( nextIdx, baseNum, nextBase )
-    call s:SetupCmdlineForBaseMessage()
+    " setting, until cursor is moved (this already happens when a next match is
+    " selected, but then the "match m of n" message takes over) or insert mode
+    " is left.
+    call ingo#cmdline#showmode#OneLineTemporaryNoShowMode()
 
     echohl ModeMsg
     echo '-- Snippet completion (^X]^N^P) '
@@ -271,7 +264,7 @@ function! SnippetComplete#SnippetComplete( types )
     " and thus always generate the shortest bases; end-id and non-id
     " abbreviations accept more character classes and can result in longer
     " bases.
-    let l:baseColumns = reverse(sort(keys(s:lastCompletionsByBaseCol), 'ingocollections#numsort'))
+    let l:baseColumns = reverse(sort(keys(s:lastCompletionsByBaseCol), 'ingo#collections#numsort'))
 
     if l:baseNum > 0
 	" Show the completions for the current base.

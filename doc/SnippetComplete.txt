@@ -60,6 +60,11 @@ CTRL-X ]		Find matches for abbreviations that start with the
 			<Space> or |i_CTRL-]| to select an abbreviation, it'll
 			be expanded automatically.
 
+								 *i_CTRL-X_g]*
+CTRL-X g]		Find matches for buffer-local abbreviations that start
+			with the text in front of the cursor. If other snippet
+			types are registered, show those (local ones), too.
+
 ==============================================================================
 INSTALLATION					*SnippetComplete-installation*
 
@@ -76,6 +81,8 @@ DEPENDENCIES					*SnippetComplete-dependencies*
 - Requires Vim 7.0 or higher.
 - Requires the |CompleteHelper.vim| plugin (vimscript #3914), version 1.10 or
   higher.
+- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.009 or
+  higher.
 
 ==============================================================================
 CONFIGURATION				       *SnippetComplete-configuration*
@@ -84,9 +91,9 @@ For a permanent configuration, put the following commands into your |vimrc|:
 
 						       *SnippetComplete-remap*
 If you want to use a different mapping, map your keys to the
-<Plug>(SnippetComplete) mapping target _before_ sourcing the script (e.g. in
-your |vimrc|).
-For example, to use CTRL-X <Tab>, use this: >
+<Plug>(SnippetComplete...) mapping targets _before_ sourcing the script (e.g.
+in your |vimrc|).
+For example, to use CTRL-X <Tab> as the completion trigger, define this: >
     imap <C-x><Tab> <Plug>(SnippetComplete)
 <
 ==============================================================================
@@ -123,7 +130,11 @@ To include the snippets in the |i_CTRL-X_]| completion mapping provided here: >
 <
 To create a separate completion mapping for your type: >
     inoremap <silent> <C-x>% <C-r>=SnippetComplete#PreSnippetCompleteExpr()<CR><C-r>=SnippetComplete#SnippetComplete(typeDefinition)<CR>
-<
+<				      *g:SnippetComplete_LocalRegisteredTypes*
+Like |g:SnippetComplete_RegisteredTypes|, but to include (preferably only
+local) snippets in the |i_CTRL-X_g]| completion mapping for buffer-local
+abbreviation https://github.com/tek/vim-argh/blob/master/autoload/argh.vim#L54 s.
+
 ==============================================================================
 LIMITATIONS					 *SnippetComplete-limitations*
 
@@ -141,6 +152,14 @@ IDEAS						       *SnippetComplete-ideas*
 
 ==============================================================================
 HISTORY						     *SnippetComplete-history*
+
+2.20	03-Apr-2014
+- ENH: Add CTRL-X g] mapping variant that limits the results to buffer-local
+  abbreviations. This is useful to quickly get an overview of
+  filetype-specific abbreviations, which are usually drowned in the sea of
+  global ones (and snippets if integrated).
+- Add dependency to ingo-library (vimscript #4433). *** You need to separately
+  install ingo-library (vimscript #4433) version 1.009 (or higher)! ***
 
 2.11	15-Jan-2013
 FIX: Must use numerical sort() for s:lastCompletionsByBaseCol.
@@ -170,8 +189,8 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2010-2013 Ingo Karkat
-The VIM LICENSE applies to this script; see |copyright|.
+Copyright: (C) 2010-2014 Ingo Karkat
+The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
 ==============================================================================
